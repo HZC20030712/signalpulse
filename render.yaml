@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: signalpulse
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    healthCheckPath: /health
+    envVars:
+      - key: X402_PAY_TO
+        value: "0x32bf81c00bb2bd9ceb087690a64f2d4408a924c4"
+      - key: PUBLIC_URL
+        sync: false
+      - key: OKX_API_KEY
+        sync: false
+      - key: OKX_SECRET_KEY
+        sync: false
+      - key: OKX_PASSPHRASE
+        sync: false
