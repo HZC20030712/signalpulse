@@ -201,6 +201,33 @@ async def health():
     return {"ok": True}
 
 
+LLMS_TXT = """# SentinelPulse — Agent Decision-Safety API
+
+> Pre-broadcast transaction final check, deterministic trust scoring, and service routing for agent-to-agent decisions. Every output carries evidence + formula; re-runnable and verifiable. Settles per call on X Layer.
+
+## Endpoint
+- MCP (Streamable HTTP): https://sentinelpulse-b80t.onrender.com/mcp
+
+## Tools
+- tx_guard (0.12 USDT/call): decodes calldata, flags risky patterns (unlimited approval, setApprovalForAll, proxy upgrade, ownership change), simulates on-chain, returns allow/caution/block with evidence.
+- trust_score (0.08): deterministic 0-100 trust ranking of candidate service providers with risk flags.
+- route_pick (0.08): ranks candidate services by capability match, price fit and trust; returns recommendation, alternatives, fallbacks with evidence receipt.
+- guard_sample (free): sample tx_guard verdict on an unlimited-approval transaction.
+
+## Payment
+x402 v2, scheme=exact, network=eip155:196 (X Layer), asset=USDT0.
+
+## Example
+curl -X POST https://sentinelpulse-b80t.onrender.com/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"tx_guard","arguments":{"chain":"ethereum","to":"0x000000000000000000000000000000000000dead","calldata":"0x095ea7b3"}}}'
+"""
+
+
+@app.get("/llms.txt")
+async def llms_txt():
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(LLMS_TXT)
+
+
 if __name__ == "__main__":
     import uvicorn
 
