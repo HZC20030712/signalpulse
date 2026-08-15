@@ -1,49 +1,36 @@
-# SignalPulse
+# Pulse Tool Suite — per-call crypto APIs for AI agents
 
-付费交易信号 MCP 服务（x402 v2，X Layer 结算）。面向 AI Agent 买家，按次收 USDT。
+A portfolio of deterministic, per-call paid APIs for autonomous agents, settled on X Layer via x402 v2 (scheme=exact, asset=USDT0). Every output is re-runnable and verifiable.
 
-## 工具与定价
+| Brand | Category | Endpoint | Tools & price |
+|---|---|---|---|
+| **SignalPulse** | trading signal | `https://signalpulse.onrender.com/mcp` | `get_signal` 0.05 · `get_market_pulse` 0.01 · `get_gas_prices` 0.005 · `get_sample_signal` free · `list_pairs` free |
+| **RiskPulse** | risk math | `https://riskpulse-priz.onrender.com/mcp` | `position_size` 0.01 · `liquidation_gate` 0.01 · `funding_scan` 0.01 · `get_sample` free |
+| **SentinelPulse** | decision safety | `https://sentinelpulse-b80t.onrender.com/mcp` | `tx_guard` 0.12 · `trust_score` 0.08 · `route_pick` 0.08 · `guard_sample` free |
 
-| 工具 | 价格 (USDT/次) | 说明 |
-|---|---|---|
-| `get_signal` | 0.05 | 方向/置信度/理由/入场/止损/目标位（EMA+MACD+RSI+ATR+成交量流） |
-| `get_market_pulse` | 0.01 | BTC/ETH/SOL 市场状态快照 |
-| `get_gas_prices` | 0.005 | 六链实时 gas（引流款） |
-| `get_sample_signal` | 免费 | BTC-USD 1h 样例（引流） |
-| `list_pairs` | 免费 | 支持的币对与周期 |
+## SignalPulse — trading signal API
 
-数据源：OKX 公开行情 API（无需鉴权）。支持 10 币对 × 5 时间框架。
+Multi-factor trading signal for BTC/ETH/SOL and more: direction (long/short/flat), confidence 0-1, entry/stop-loss/targets from EMA, MACD, RSI, ATR and volume-flow on live OKX market data. Also market regime snapshots and multi-chain gas prices.
 
-## 本地运行
+## RiskPulse — risk-math API
+
+Deterministic position sizing via Kelly criterion with risk-of-ruin estimate; perpetual liquidation price and safety distance; and a market-wide funding-rate arbitrage scan. Every result carries its formula and inputs.
+
+## SentinelPulse — decision-safety API
+
+Pre-broadcast transaction final check: calldata decoding, risky-pattern detection (unlimited approval, setApprovalForAll, proxy upgrade), and on-chain simulation returning allow/caution/block with evidence. Plus deterministic trust scoring and service routing for agent-to-agent decisions.
+
+## Calling convention
+
+All endpoints are MCP (Streamable HTTP). Paid tools return HTTP 402 + `PAYMENT-REQUIRED` (x402 v2) until the buyer replays with a `PAYMENT-SIGNATURE` header.
 
 ```bash
-pip install -r requirements.txt
-
-# 开发模式（跳过收款验证）
-X402_DEV_MODE=true X402_PAY_TO=<你的收款地址> python server.py
-
-# 生产模式（需要 OKX API 三件套，用于 facilitator verify/settle）
-X402_PAY_TO=0x32bf81c00bb2bd9ceb087690a64f2d4408a924c4 \
-OKX_API_KEY=... OKX_SECRET_KEY=... OKX_PASSPHRASE=... \
-PUBLIC_URL=https://<你的域名> \
-python server.py
+curl -X POST https://signalpulse.onrender.com/mcp -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_signal","arguments":{"pair":"BTC-USD","timeframe":"1h"}}}'
 ```
 
-端点：`POST /mcp`（MCP Streamable HTTP）。付费工具未携带 `PAYMENT-SIGNATURE` 时返回 HTTP 402 + `PAYMENT-REQUIRED`（x402 v2，scheme=exact，network=eip155:196，asset=USDT0）。
+Machine-readable catalogs: `https://<endpoint-host>/llms.txt`
 
-## 部署（Render 免费档）
+## Compliance
 
-1. 把本目录推到 GitHub 仓库
-2. render.com → New Web Service → 选仓库
-   - Build: `pip install -r requirements.txt`
-   - Start: `python server.py`
-3. 环境变量：`X402_PAY_TO`、`OKX_API_KEY`、`OKX_SECRET_KEY`、`OKX_PASSPHRASE`、`PUBLIC_URL=https://<分配到的域名>`
-4. 验证：`curl https://<域名>/health`
-
-## 上架 OKX.AI 市场
-
-用 `onchainos` CLI 注册 ASP 身份并添加服务（serviceType=A2MCP，endpoint=`https://<域名>/mcp`，fee 按上表）。详见 okx-ai skill 的 identity-register 流程。
-
-## 合规
-
-所有输出含 "Informational only, not investment advice." 免责声明。
+All outputs carry an "Informational only, not investment advice." disclaimer.
