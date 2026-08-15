@@ -200,6 +200,33 @@ async def health():
     return {"ok": True}
 
 
+LLMS_TXT = """# RiskPulse — Deterministic Risk-Math API for AI Agents
+
+> Position sizing, liquidation gating, and funding-rate arbitrage. Every result carries its formula and inputs; re-runnable and verifiable. Settles per call on X Layer.
+
+## Endpoint
+- MCP (Streamable HTTP): https://riskpulse-priz.onrender.com/mcp
+
+## Tools
+- position_size (0.01 USDT/call): Kelly criterion sizing (full/half/quarter) with fixed-fractional cap and risk-of-ruin estimate.
+- liquidation_gate (0.01): perpetual liquidation price, distance % and safety verdict from entry, leverage, side, maintenance margin.
+- funding_scan (0.01): scans liquid USDT-margined perpetuals for extreme funding rates and spot-perp arbitrage ideas.
+- get_sample (free): sample position_size output.
+
+## Payment
+x402 v2, scheme=exact, network=eip155:196 (X Layer), asset=USDT0.
+
+## Example
+curl -X POST https://riskpulse-priz.onrender.com/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"position_size","arguments":{"bankroll":10000,"win_rate":0.55,"payoff_ratio":1.8}}}'
+"""
+
+
+@app.get("/llms.txt")
+async def llms_txt():
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(LLMS_TXT)
+
+
 if __name__ == "__main__":
     import uvicorn
 
