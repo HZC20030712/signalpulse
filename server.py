@@ -193,6 +193,34 @@ async def health():
     return {"ok": True}
 
 
+LLMS_TXT = """# SignalPulse — Crypto Trading Signal API for AI Agents
+
+> Per-call trading signals for autonomous agents. Deterministic, re-runnable. Settles per call on X Layer.
+
+## Endpoint
+- MCP (Streamable HTTP): https://signalpulse.onrender.com/mcp
+
+## Tools
+- get_signal (0.05 USDT/call): direction (long/short/flat), confidence 0-1, entry/stop-loss/targets from EMA, MACD, RSI, ATR and volume-flow on live OKX market data for BTC/ETH/SOL and more.
+- get_market_pulse (0.01): BTC/ETH/SOL market regime snapshot.
+- get_gas_prices (0.005): gas prices across X Layer, Ethereum, Base, BSC, Polygon, Arbitrum.
+- get_sample_signal (free): sample get_signal output for BTC-USD 1h.
+- list_pairs (free): supported pairs and timeframes.
+
+## Payment
+x402 v2, scheme=exact, network=eip155:196 (X Layer), asset=USDT0.
+
+## Example
+curl -X POST https://signalpulse.onrender.com/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_signal","arguments":{"pair":"BTC-USD","timeframe":"1h"}}}'
+"""
+
+
+@app.get("/llms.txt")
+async def llms_txt():
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(LLMS_TXT)
+
+
 if __name__ == "__main__":
     import uvicorn
 
